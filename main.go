@@ -64,6 +64,5 @@ func main() {
 
 	log.WithFields(log.Fields{"uiAction": uiAction, "uiParam": 0, "pvParam": pvParam}).Info("SystemParametersInfoW")
 
-
 	systemParametersInfo.Call(uintptr(uiAction), 0, pvParam, 2)
 }
