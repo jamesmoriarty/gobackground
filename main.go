@@ -14,8 +14,11 @@ import (
 )
 
 const (
-	// https://source.unsplash.com
+	// wallpaper source
+
 	URL = "https://source.unsplash.com/collection/220388/1920x1080"
+
+	// user32.dll - systemParametersInfo https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-systemparametersinfow
 
 	// fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
