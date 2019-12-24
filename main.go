@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -23,9 +24,7 @@ const (
 )
 
 var (
-	url                  = "https://source.unsplash.com/collection/220388/1920x1080"
-	user32               = syscall.NewLazyDLL("user32.dll")
-	systemParametersInfo = user32.NewProc("SystemParametersInfoW") // https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-systemparametersinfow
+	url = "https://source.unsplash.com/collection/220388/1920x1080"
 )
 
 func toHex(ptr uintptr) string {
@@ -35,16 +34,14 @@ func toHex(ptr uintptr) string {
 	return h
 }
 
-func main() {
-	log.SetFormatter(&log.TextFormatter{ForceColors: true})
-
+func getRandomDesktopWallpaperPath() (string, error) {
 	dir, err := ioutil.TempDir("", "gobackground")
 
 	log.WithFields(log.Fields{"path": dir}).Info("Created directory")
 
 	if err != nil {
 		log.Fatal("Error: ", err)
-		os.Exit(2)
+		return "", err
 	}
 
 	path := dir + "\\background.jpg"
@@ -55,7 +52,7 @@ func main() {
 
 	if err != nil {
 		log.Fatal("Error: ", err)
-		os.Exit(2)
+		return "", err
 	}
 
 	defer resp.Body.Close()
@@ -66,7 +63,7 @@ func main() {
 
 	if err != nil {
 		log.Fatal("Error: ", err)
-		os.Exit(2)
+		return "", err
 	}
 
 	defer out.Close()
@@ -75,14 +72,43 @@ func main() {
 
 	if err != nil {
 		log.Fatal("Error: ", err)
-		os.Exit(2)
+		return "", err
 	}
 
+	return path, nil
+}
+
+func setDesktopWallpaper(path string) error {
 	pvParam := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(path)))
+	uiParam := uintptr(0)
 	uiAction := uintptr(SPI_SETDESKWALLPAPER)
 	fWinIni := uintptr(SPIF_SENDWININICHANGE)
+	user32 := syscall.NewLazyDLL("user32.dll")
+	systemParametersInfo := user32.NewProc("SystemParametersInfoW") // https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-systemparametersinfow
 
 	log.WithFields(log.Fields{"uiAction": toHex(uiAction), "uiParam": toHex(0), "pvParam": toHex(pvParam), "fWinIni": toHex(fWinIni)}).Info("SystemParametersInfoW")
 
-	systemParametersInfo.Call(uintptr(uiAction), 0, uintptr(pvParam), uintptr(fWinIni))
+	ret, _, _ := systemParametersInfo.Call(uiAction, uiParam, pvParam, fWinIni)
+
+	if ret == 0 {
+		return errors.New("Failed setting desktopwallpaper")
+	}
+
+	return nil
+}
+
+func main() {
+	log.SetFormatter(&log.TextFormatter{ForceColors: true})
+
+	path, err := getRandomDesktopWallpaperPath()
+
+	if err != nil {
+		os.Exit(2)
+	}
+
+	err = setDesktopWallpaper(path)
+
+	if err != nil {
+		os.Exit(2)
+	}
 }
