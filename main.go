@@ -14,6 +14,9 @@ import (
 )
 
 const (
+	// https://source.unsplash.com
+	URL = "https://source.unsplash.com/collection/220388/1920x1080"
+
 	// fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
 	SPIF_SENDCHANGE       = 0x1
@@ -21,10 +24,6 @@ const (
 
 	// uiAction
 	SPI_SETDESKWALLPAPER = 0x0014 // SPI_SETDESKWALLPAPER 0x0014 - Note  When the SPI_SETDESKWALLPAPER flag is used, SystemParametersInfo returns TRUE unless there is an error (like when the specified file doesn't exist).
-)
-
-var (
-	url = "https://source.unsplash.com/collection/220388/1920x1080"
 )
 
 func toHex(ptr uintptr) string {
@@ -46,9 +45,9 @@ func getRandomDesktopWallpaperPath() (string, error) {
 
 	path := dir + "\\background.jpg"
 
-	log.WithFields(log.Fields{"url": url}).Info("Fetching")
+	log.WithFields(log.Fields{"url": URL}).Info("Fetching")
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(URL)
 
 	if err != nil {
 		log.Fatal("Error: ", err)
