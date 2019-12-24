@@ -5,20 +5,16 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
 const (
-	// wallpaper source
-
 	URL = "https://source.unsplash.com/collection/220388/1920x1080"
-
-	// user32.dll - systemParametersInfo https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-systemparametersinfow
 
 	// fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
@@ -26,7 +22,7 @@ const (
 	SPIF_SENDWININICHANGE = 0x2
 
 	// uiAction
-	SPI_SETDESKWALLPAPER = 0x0014 // SPI_SETDESKWALLPAPER 0x0014 - Note  When the SPI_SETDESKWALLPAPER flag is used, SystemParametersInfo returns TRUE unless there is an error (like when the specified file doesn't exist).
+	SPI_SETDESKWALLPAPER = 0x0014
 )
 
 func toHex(ptr uintptr) string {
@@ -37,7 +33,7 @@ func toHex(ptr uintptr) string {
 }
 
 func getRandomDesktopWallpaperPath() (string, error) {
-	dir, err := ioutil.TempDir("", "gobackground")
+	dir, err := os.UserHomeDir()
 
 	log.WithFields(log.Fields{"path": dir}).Info("Created directory")
 
@@ -46,7 +42,7 @@ func getRandomDesktopWallpaperPath() (string, error) {
 		return "", err
 	}
 
-	path := dir + "\\background.jpg"
+	path := dir + "\\Pictures\\" + fmt.Sprintf("%d", time.Now().UnixNano()) +".jpg"
 
 	log.WithFields(log.Fields{"url": URL}).Info("Fetching")
 
