@@ -15,5 +15,5 @@ Releases can be downloaded from [here][1].
 ## Build
 
 ```
-go build -v .
+go build -v -ldflags -H=windowsgui .
 ```
