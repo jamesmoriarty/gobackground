@@ -80,7 +80,6 @@ func getRandomDesktopWallpaperPath(url string) (string, error) {
 	dir, err := os.UserHomeDir()
 
 	if err != nil {
-		log.Fatal("Error: ", err)
 		return "", err
 	}
 
@@ -91,7 +90,6 @@ func getRandomDesktopWallpaperPath(url string) (string, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatal("Error: ", err)
 		return "", err
 	}
 
@@ -102,7 +100,6 @@ func getRandomDesktopWallpaperPath(url string) (string, error) {
 	out, err := os.Create(path)
 
 	if err != nil {
-		log.Fatal("Error: ", err)
 		return "", err
 	}
 
@@ -111,7 +108,6 @@ func getRandomDesktopWallpaperPath(url string) (string, error) {
 	_, err = io.Copy(out, resp.Body)
 
 	if err != nil {
-		log.Fatal("Error: ", err)
 		return "", err
 	}
 
