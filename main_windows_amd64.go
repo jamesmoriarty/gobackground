@@ -36,8 +36,6 @@ func toHex(ptr uintptr) string {
 func getRandomDesktopWallpaperPath() (string, error) {
 	dir, err := os.UserHomeDir()
 
-	log.WithFields(log.Fields{"path": dir}).Info("Created directory")
-
 	if err != nil {
 		log.Fatal("Error: ", err)
 		return "", err
@@ -63,7 +61,7 @@ func getRandomDesktopWallpaperPath() (string, error) {
 
 	defer resp.Body.Close()
 
-	log.WithFields(log.Fields{"path": path}).Info("Writing file")
+	log.WithFields(log.Fields{"path": path}).Info("Writing")
 
 	out, err := os.Create(path)
 
@@ -85,18 +83,16 @@ func getRandomDesktopWallpaperPath() (string, error) {
 }
 
 func setDesktopWallpaper(path string) error {
-	pvParam := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(path)))
-	uiParam := uintptr(0)
-	uiAction := uintptr(SPI_SETDESKWALLPAPER)
-	fWinIni := uintptr(SPIF_SENDWININICHANGE)
-	user32 := syscall.NewLazyDLL("user32.dll")
-	systemParametersInfo := user32.NewProc("SystemParametersInfoW") // https://docs.microsoft.com/en-gb/windows/win32/api/winuser/nf-winuser-systemparametersinfow
+	pvParam := unsafe.Pointer(syscall.StringToUTF16Ptr(path))
+	uiParam := uint32(0)
+	uiAction := uint32(SPI_SETDESKWALLPAPER)
+	fWinIni := uint32(SPIF_SENDWININICHANGE)
 
-	log.WithFields(log.Fields{"uiAction": toHex(uiAction), "uiParam": toHex(0), "pvParam": toHex(pvParam), "fWinIni": toHex(fWinIni)}).Info("SystemParametersInfoW")
+	log.WithFields(log.Fields{"uiAction": uiAction, "uiParam": 0, "pvParam": toHex(uintptr(pvParam)), "fWinIni": fWinIni}).Info("SystemParametersInfoW")
 
-	ret, _, _ := systemParametersInfo.Call(uiAction, uiParam, pvParam, fWinIni)
+	ret := win.SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni)
 
-	if ret == 0 {
+	if ret != true {
 		return errors.New("Failed setting desktopwallpaper")
 	}
 
