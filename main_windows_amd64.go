@@ -127,7 +127,7 @@ func setDesktopWallpaper(path string) error {
 	key := "WallpaperStyle"
 	value := "10" // Fill
 
-	log.WithFields(log.Fields{"dir": dir, "key": 0, "value": value, "dll": "advapi32"}).Info("RegSetValueEx")
+	log.WithFields(log.Fields{"dir": dir, "key": key, "value": value, "dll": "advapi32"}).Info("RegSetValueEx")
 
 	setRegString(dir, key, value)
 
