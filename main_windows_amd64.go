@@ -142,18 +142,21 @@ func main() {
 	path, err := getRandomDesktopWallpaperPath()
 
 	if err != nil {
+		log.Fatal(err)
 		os.Exit(2)
 	}
 
 	err = setDesktopWallpaper(path)
 
 	if err != nil {
+		log.Fatal(err)
 		os.Exit(2)
 	}
 
 	err = setRegString("Control Panel\\Desktop", "WallpaperStyle", "10")
 
 	if err != nil {
+		log.Fatal(err)
 		os.Exit(2)
 	}
 }

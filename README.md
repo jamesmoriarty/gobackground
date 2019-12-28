@@ -17,3 +17,9 @@ Releases can be downloaded from [here][1].
 ```
 go build -v -ldflags -H=windowsgui .
 ```
+
+## Development
+
+Build without `-ldflags -H=windowsgui` for logging.
+
+![Logs](/docs/logs.png)
