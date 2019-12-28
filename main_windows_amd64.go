@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	win "github.com/lxn/win"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -14,9 +15,7 @@ import (
 )
 
 const (
-	WIDTH  = 1920
-	HEIGHT = 1080
-	URL    = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
+	URL = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
 
 	// fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
@@ -46,7 +45,12 @@ func getRandomDesktopWallpaperPath() (string, error) {
 
 	path := dir + "\\Pictures\\" + fmt.Sprintf("%d", time.Now().UnixNano()) + ".jpg"
 
-	url := fmt.Sprintf(URL, WIDTH, HEIGHT)
+	width := int(win.GetSystemMetrics(win.SM_CXSCREEN))
+	height := int(win.GetSystemMetrics(win.SM_CYSCREEN))
+
+	log.WithFields(log.Fields{"width": width, "height": height}).Info("GetSystemMetrics")
+
+	url := fmt.Sprintf(URL, width, height)
 
 	log.WithFields(log.Fields{"url": url}).Info("Fetching")
 
