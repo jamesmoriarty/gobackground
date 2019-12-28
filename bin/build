@@ -6,5 +6,8 @@ set +e
 
 VERSION=$(git rev-parse --short HEAD)
 DATE=$(date -u +.%Y%m%d.%H%M%S)
+GOOS=windows
 
-go build -v .
+gofmt -w -s .
+
+go build -v -ldflags -H=windowsgui .
