@@ -41,7 +41,7 @@ func getRandomDesktopWallpaperPath() (string, error) {
 		return "", err
 	}
 
-	path := dir + "\\Pictures\\" + fmt.Sprintf("%d", time.Now().UnixNano()) + ".jpg"
+	path := fmt.Sprintf("%s\\Pictures\\%d.jpg", dir, time.Now().UnixNano())
 
 	width := int(win.GetSystemMetrics(win.SM_CXSCREEN))
 	height := int(win.GetSystemMetrics(win.SM_CYSCREEN))
