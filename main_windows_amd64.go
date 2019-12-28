@@ -48,20 +48,26 @@ func errstr(errno int32) string {
 	return string(utf16.Decode(b[:n]))
 }
 
-func setRegString(dir string, key string, value string) {
+func setRegString(dir string, key string, value string) error {
 	var handle win.HKEY
+
+	log.WithFields(log.Fields{"dll": "advapi32"}).Info("RegOpenKeyEx")
 
 	ret := win.RegOpenKeyEx(win.HKEY_CURRENT_USER, syscall.StringToUTF16Ptr(dir), 0, syscall.KEY_WRITE, &handle)
 
 	if ret != 0 {
-		panic(fmt.Sprintf("RegOpenKeyEx: %s", errstr(ret)))
+		return errors.New(fmt.Sprintf("Failed Opening Registry Key: %s", errstr(ret)))
 	}
+
+	log.WithFields(log.Fields{"dll": "advapi32"}).Info("RegSetValueEx")
 
 	ret = win.RegSetValueEx(handle, syscall.StringToUTF16Ptr(key), 0, win.REG_SZ, (*byte)(unsafe.Pointer(syscall.StringToUTF16Ptr(value))), 32)
 
 	if ret != 0 {
-		panic(fmt.Sprintf("RegSetValueEx: %s", errstr(ret)))
+		return errors.New(fmt.Sprintf("Failed Setting Registry Key Value: %s", errstr(ret)))
 	}
+
+	return nil
 }
 
 func getRandomDesktopWallpaperPath() (string, error) {
@@ -119,20 +125,12 @@ func setDesktopWallpaper(path string) error {
 	uiAction := uint32(SPI_SETDESKWALLPAPER)
 	fWinIni := uint32(SPIF_SENDWININICHANGE)
 
-	log.WithFields(log.Fields{"uiAction": uiAction, "uiParam": 0, "pvParam": toHex(uintptr(pvParam)), "fWinIni": fWinIni, "dll": "user32"}).Info("SystemParametersInfoW")
+	log.WithFields(log.Fields{"dll": "user32"}).Info("SystemParametersInfoW")
 
 	ret := win.SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni)
 
-	dir := "Control Panel\\Desktop"
-	key := "WallpaperStyle"
-	value := "10" // Fill
-
-	log.WithFields(log.Fields{"dir": dir, "key": key, "value": value, "dll": "advapi32"}).Info("RegSetValueEx")
-
-	setRegString(dir, key, value)
-
 	if ret != true {
-		return errors.New("Failed setting desktopwallpaper")
+		return errors.New("Failed setting Desktop Wallpaper")
 	}
 
 	return nil
@@ -148,6 +146,12 @@ func main() {
 	}
 
 	err = setDesktopWallpaper(path)
+
+	if err != nil {
+		os.Exit(2)
+	}
+
+	err = setRegString("Control Panel\\Desktop", "WallpaperStyle", "10")
 
 	if err != nil {
 		os.Exit(2)
