@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"syscall"
 	"time"
 	"unicode/utf16"
@@ -27,13 +26,6 @@ const (
 	SPI_SETDESKWALLPAPER = 0x0014
 )
 
-func toHex(ptr uintptr) string {
-	s := fmt.Sprintf("%d", ptr)
-	n, _ := strconv.Atoi(s)
-	h := fmt.Sprintf("0x%x", n)
-	return h
-}
-
 func errstr(errno int32) string {
 	// ask windows for the remaining errors
 	var flags uint32 = syscall.FORMAT_MESSAGE_FROM_SYSTEM | syscall.FORMAT_MESSAGE_ARGUMENT_ARRAY | syscall.FORMAT_MESSAGE_IGNORE_INSERTS
@@ -42,9 +34,11 @@ func errstr(errno int32) string {
 	if err != nil {
 		return fmt.Sprintf("error %d (FormatMessage failed with: %v)", errno, err)
 	}
+
 	// trim terminating \r and \n
 	for ; n > 0 && (b[n-1] == '\n' || b[n-1] == '\r'); n-- {
 	}
+
 	return string(utf16.Decode(b[:n]))
 }
 
@@ -56,7 +50,7 @@ func setRegString(dir string, key string, value string) error {
 	ret := win.RegOpenKeyEx(win.HKEY_CURRENT_USER, syscall.StringToUTF16Ptr(dir), 0, syscall.KEY_WRITE, &handle)
 
 	if ret != 0 {
-		return errors.New(fmt.Sprintf("Failed Opening Registry Key: %s", errstr(ret)))
+		return fmt.Errorf("Failed Opening Registry Key: %s", errstr(ret))
 	}
 
 	log.WithFields(log.Fields{"dll": "advapi32"}).Info("RegSetValueEx")
@@ -64,7 +58,7 @@ func setRegString(dir string, key string, value string) error {
 	ret = win.RegSetValueEx(handle, syscall.StringToUTF16Ptr(key), 0, win.REG_SZ, (*byte)(unsafe.Pointer(syscall.StringToUTF16Ptr(value))), 32)
 
 	if ret != 0 {
-		return errors.New(fmt.Sprintf("Failed Setting Registry Key Value: %s", errstr(ret)))
+		return fmt.Errorf("Failed Setting Registry Key Value: %s", errstr(ret))
 	}
 
 	return nil
