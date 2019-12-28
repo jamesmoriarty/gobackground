@@ -70,7 +70,19 @@ func setRegString(dir string, key string, value string) error {
 	return nil
 }
 
-func getRandomDesktopWallpaperPath() (string, error) {
+func width() int {
+	log.WithFields(log.Fields{"dll": "winuser"}).Info("GetSystemMetrics")
+
+	return int(win.GetSystemMetrics(win.SM_CXSCREEN))
+}
+
+func height() int {
+	log.WithFields(log.Fields{"dll": "winuser"}).Info("GetSystemMetrics")
+
+	return int(win.GetSystemMetrics(win.SM_CYSCREEN))
+}
+
+func getRandomDesktopWallpaperPath(url string) (string, error) {
 	dir, err := os.UserHomeDir()
 
 	if err != nil {
@@ -79,13 +91,6 @@ func getRandomDesktopWallpaperPath() (string, error) {
 	}
 
 	path := fmt.Sprintf("%s\\Pictures\\%d.jpg", dir, time.Now().UnixNano())
-
-	width := int(win.GetSystemMetrics(win.SM_CXSCREEN))
-	height := int(win.GetSystemMetrics(win.SM_CYSCREEN))
-
-	log.WithFields(log.Fields{"width": width, "height": height}).Info("GetSystemMetrics")
-
-	url := fmt.Sprintf(URL, width, height)
 
 	log.WithFields(log.Fields{"url": url}).Info("Fetching")
 
@@ -139,7 +144,9 @@ func setDesktopWallpaper(path string) error {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 
-	path, err := getRandomDesktopWallpaperPath()
+	url := fmt.Sprintf(URL, width(), height())
+
+	path, err := getRandomDesktopWallpaperPath(url)
 
 	if err != nil {
 		log.Fatal(err)
