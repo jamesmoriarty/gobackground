@@ -120,7 +120,7 @@ func setDesktopWallpaper(path string) error {
 	uiAction := uint32(SPI_SETDESKWALLPAPER)
 	fWinIni := uint32(SPIF_SENDWININICHANGE)
 
-	log.WithFields(log.Fields{"dll": "user32"}).Info("SystemParametersInfoW")
+	log.WithFields(log.Fields{"dll": "winuser"}).Info("SystemParametersInfoW")
 
 	ret := win.SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni)
 
