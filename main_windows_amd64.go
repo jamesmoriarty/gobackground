@@ -15,7 +15,13 @@ import (
 )
 
 const (
+	// search
 	URL = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
+
+	// registry
+	WallpaperStyleDir   = "Control Panel\\Desktop"
+	WallpaperStyleKey   = "WallpaperStyle"
+	WallpaperStyleValue = "10"
 
 	// fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
@@ -42,7 +48,7 @@ func errstr(errno int32) string {
 	return string(utf16.Decode(b[:n]))
 }
 
-func setRegString(dir string, key string, value string) error {
+func setRegistryValue(dir string, key string, value string) error {
 	var handle win.HKEY
 
 	log.WithFields(log.Fields{"dll": "advapi32"}).Info("RegOpenKeyEx")
@@ -150,7 +156,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = setRegString("Control Panel\\Desktop", "WallpaperStyle", "10")
+	err = setRegistryValue(WallpaperStyleDir, WallpaperStyleKey, WallpaperStyleValue)
 
 	if err != nil {
 		log.Fatal(err)
