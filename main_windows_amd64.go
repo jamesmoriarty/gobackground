@@ -16,24 +16,23 @@ import (
 
 const (
 	// Unspashed Search
-	URL = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
+	urlTemplate = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
 
 	// Registry Wallpaper
-	WallpaperDir = "Control Panel\\Desktop"
-	WallpaperKey = "Wallpaper"
+	wallpaperDir = "Control Panel\\Desktop"
+	wallpaperKey = "Wallpaper"
 
 	// Registry WallpaperStyle
-	WallpaperStyleDir   = "Control Panel\\Desktop"
-	WallpaperStyleKey   = "WallpaperStyle"
-	WallpaperStyleValue = "10"
+	wallpaperStyleDir   = "Control Panel\\Desktop"
+	wallpaperStyleKey   = "WallpaperStyle"
+	wallpaperStyleValue = "10"
 
 	// SystemParametersInfo fWinIni
-	SPIF_UPDATEINIFILE    = 0x0
-	SPIF_SENDCHANGE       = 0x1
-	SPIF_SENDWININICHANGE = 0x2
+	spifUpdateIniFile    = uint32(0x1)
+	spifSendWinIniChange = uint32(0x2)
 
 	// SystemParametersInfo uiAction
-	SPI_SETDESKWALLPAPER = 0x0014
+	spiSetDesktopWallpaper = uint32(0x0014)
 )
 
 func errstr(errno int32) string {
@@ -127,8 +126,8 @@ func getRandomDesktopWallpaperPath(url string) (string, error) {
 func setDesktopWallpaper(path string) error {
 	pvParam := unsafe.Pointer(syscall.StringToUTF16Ptr(path))
 	uiParam := uint32(0)
-	uiAction := uint32(SPI_SETDESKWALLPAPER)
-	fWinIni := uint32(SPIF_SENDWININICHANGE)
+	uiAction := spiSetDesktopWallpaper
+	fWinIni := spifSendWinIniChange
 
 	log.WithFields(log.Fields{"dll": "winuser"}).Info("SystemParametersInfoW")
 
@@ -144,7 +143,7 @@ func setDesktopWallpaper(path string) error {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 
-	url := fmt.Sprintf(URL, width(), height())
+	url := fmt.Sprintf(urlTemplate, width(), height())
 
 	path, err := getRandomDesktopWallpaperPath(url)
 
@@ -160,14 +159,14 @@ func main() {
 		os.Exit(2)
 	}
 
-	err = setRegistryValue(WallpaperDir, WallpaperKey, path)
+	err = setRegistryValue(wallpaperDir, wallpaperKey, path)
 
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(2)
 	}
 
-	err = setRegistryValue(WallpaperStyleDir, WallpaperStyleKey, WallpaperStyleValue)
+	err = setRegistryValue(wallpaperStyleDir, wallpaperStyleKey, wallpaperStyleValue)
 
 	if err != nil {
 		log.Fatal(err)
