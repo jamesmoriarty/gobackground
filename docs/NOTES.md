@@ -45,3 +45,11 @@ public static void ShowAlwaysOnDesktopBehindIcons(IntPtr hwnd)
 ```
 
 https://github.com/AlexanderPro/AwesomeWallpaper/blob/master/AwesomeWallpaper/Utils/WindowUtils.cs#L16
+
+```
+// var progmanHandle = FindWindowEx(IntPtr.Zero, IntPtr.Zero, "Progman", null);
+handle := win.FindWindow(syscall.StringToUTF16Ptr("Progman"), syscall.StringToUTF16Ptr("Program Manager"))
+log.WithFields(log.Fields{"dll": "user32", "handle": handle, "error": win.GetLastError()}).Info("FindWindow")
+```
+
+WIP: find window to draw to.

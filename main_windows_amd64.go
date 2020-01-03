@@ -15,20 +15,24 @@ import (
 )
 
 const (
-	// search
+	// Unspashed Search
 	URL = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
 
-	// registry
+	// Registry Wallpaper
+	WallpaperDir = "Control Panel\\Desktop"
+	WallpaperKey = "Wallpaper"
+
+	// Registry WallpaperStyle
 	WallpaperStyleDir   = "Control Panel\\Desktop"
 	WallpaperStyleKey   = "WallpaperStyle"
 	WallpaperStyleValue = "10"
 
-	// fWinIni
+	// SystemParametersInfo fWinIni
 	SPIF_UPDATEINIFILE    = 0x0
 	SPIF_SENDCHANGE       = 0x1
 	SPIF_SENDWININICHANGE = 0x2
 
-	// uiAction
+	// SystemParametersInfo uiAction
 	SPI_SETDESKWALLPAPER = 0x0014
 )
 
@@ -61,7 +65,7 @@ func setRegistryValue(dir string, key string, value string) error {
 
 	log.WithFields(log.Fields{"dll": "advapi32"}).Info("RegSetValueEx")
 
-	ret = win.RegSetValueEx(handle, syscall.StringToUTF16Ptr(key), 0, win.REG_SZ, (*byte)(unsafe.Pointer(syscall.StringToUTF16Ptr(value))), 32)
+	ret = win.RegSetValueEx(handle, syscall.StringToUTF16Ptr(key), 0, win.REG_SZ, (*byte)(unsafe.Pointer(syscall.StringToUTF16Ptr(value))), uint32(len(value)*2))
 
 	if ret != 0 {
 		return fmt.Errorf("Failed Setting Registry Key Value: %s", errstr(ret))
@@ -150,6 +154,13 @@ func main() {
 	}
 
 	err = setDesktopWallpaper(path)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(2)
+	}
+
+	err = setRegistryValue(WallpaperDir, WallpaperKey, path)
 
 	if err != nil {
 		log.Fatal(err)
