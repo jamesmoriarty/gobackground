@@ -85,7 +85,7 @@ func height() int {
 	return int(win.GetSystemMetrics(win.SM_CYSCREEN))
 }
 
-func getFilePathFromUrl(url string) (string, error) {
+func getFilePathFromURL(url string) (string, error) {
 	dir, err := os.UserHomeDir()
 
 	if err != nil {
@@ -147,7 +147,7 @@ func url() string {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 
-	path, err := getFilePathFromUrl(url())
+	path, err := getFilePathFromURL(url())
 
 	if err != nil {
 		log.Fatal(err)
