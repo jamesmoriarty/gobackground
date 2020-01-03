@@ -85,7 +85,7 @@ func height() int {
 	return int(win.GetSystemMetrics(win.SM_CYSCREEN))
 }
 
-func getRandomDesktopWallpaperPath(url string) (string, error) {
+func getFilePathFromUrl(url string) (string, error) {
 	dir, err := os.UserHomeDir()
 
 	if err != nil {
@@ -140,12 +140,14 @@ func setDesktopWallpaper(path string) error {
 	return nil
 }
 
+func url() string {
+	return fmt.Sprintf(urlTemplate, width(), height())
+}
+
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 
-	url := fmt.Sprintf(urlTemplate, width(), height())
-
-	path, err := getRandomDesktopWallpaperPath(url)
+	path, err := getFilePathFromUrl(url())
 
 	if err != nil {
 		log.Fatal(err)
