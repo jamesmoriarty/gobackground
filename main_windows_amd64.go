@@ -105,7 +105,7 @@ func getFilePathFromURL(url string) (string, error) {
 		return "", err
 	}
 
-	path := fmt.Sprintf("%s\\Pictures\\%d.jpg", dir, time.Now().UnixNano())
+	path := fmt.Sprintf("%s\\Downloads\\%d.jpg", dir, time.Now().UnixNano())
 
 	log.WithFields(log.Fields{"url": url}).Info("Fetching")
 
