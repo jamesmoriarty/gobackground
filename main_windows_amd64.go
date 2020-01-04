@@ -40,6 +40,7 @@ func errstr(errno int32) string {
 	var flags uint32 = syscall.FORMAT_MESSAGE_FROM_SYSTEM | syscall.FORMAT_MESSAGE_ARGUMENT_ARRAY | syscall.FORMAT_MESSAGE_IGNORE_INSERTS
 	b := make([]uint16, 300)
 	n, err := syscall.FormatMessage(flags, 0, uint32(errno), 0, b, nil)
+
 	if err != nil {
 		return fmt.Sprintf("error %d (FormatMessage failed with: %v)", errno, err)
 	}
@@ -73,16 +74,28 @@ func setRegistryValue(dir string, key string, value string) error {
 	return nil
 }
 
+func scale() float64 {
+	log.WithFields(log.Fields{"dll": "winuser"}).Info("FindWindow")
+
+	handle := win.FindWindow(syscall.StringToUTF16Ptr("Progman"), syscall.StringToUTF16Ptr("Program Manager"))
+	dpi := win.GetDpiForWindow(handle)
+	scale := (float64(dpi) / float64(96))
+
+	log.WithFields(log.Fields{"dll": "winuser", "dpi": dpi, "scale": scale}).Info("GetDpiForWindow")
+
+	return scale
+}
+
 func width() int {
 	log.WithFields(log.Fields{"dll": "winuser"}).Info("GetSystemMetrics")
 
-	return int(win.GetSystemMetrics(win.SM_CXSCREEN))
+	return int(float64(win.GetSystemMetrics(win.SM_CXSCREEN)) * scale())
 }
 
 func height() int {
 	log.WithFields(log.Fields{"dll": "winuser"}).Info("GetSystemMetrics")
 
-	return int(win.GetSystemMetrics(win.SM_CYSCREEN))
+	return int(float64(win.GetSystemMetrics(win.SM_CYSCREEN)) * scale())
 }
 
 func getFilePathFromURL(url string) (string, error) {
