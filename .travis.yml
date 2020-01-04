@@ -5,12 +5,23 @@ go:
   - 1.13.x
 
 stages:
-  - Build
+  - Build Dev
+  - Build Release
 
 jobs:
   include:
-    - stage: Build
-      script: bin/build
+    - stage: Build Dev
+      script: go build -v -o gobackground-dev.exe .
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file: gobackground-dev.exe
+        skip_cleanup: true
+        on:
+          tags: true
+
+    - stage: Build Release
+      script: go build -v -ldflags -H=windowsgui .
       deploy:
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
