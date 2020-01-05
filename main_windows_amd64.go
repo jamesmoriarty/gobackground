@@ -3,15 +3,17 @@ package main
 import (
 	"errors"
 	"fmt"
-	win "github.com/lxn/win"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"syscall"
-	"time"
 	"unicode/utf16"
 	"unsafe"
+
+	win "github.com/lxn/win"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -98,6 +100,23 @@ func height() int {
 	return int(float64(win.GetSystemMetrics(win.SM_CYSCREEN)) * scale())
 }
 
+func getPathFromResp(resp *http.Response) string {
+	url, err := url.Parse(resp.Request.URL.String())
+
+	if err != nil {
+		panic("Unexpected url")
+	}
+
+	filename := filepath.Base(url.Path)
+
+	switch resp.Header.Get("Content-Type") {
+	case "image/jpeg":
+		return fmt.Sprintf("%s\\%s.jpg", url.Hostname(), filename)
+	default:
+		panic("Unexpected content type")
+	}
+}
+
 func getFilePathFromURL(url string) (string, error) {
 	dir, err := os.UserHomeDir()
 
@@ -105,11 +124,9 @@ func getFilePathFromURL(url string) (string, error) {
 		return "", err
 	}
 
-	path := fmt.Sprintf("%s\\Downloads\\%d.jpg", dir, time.Now().UnixNano())
+	resp, err := http.Get(url)
 
 	log.WithFields(log.Fields{"url": url}).Info("Fetching")
-
-	resp, err := http.Get(url)
 
 	if err != nil {
 		return "", err
@@ -117,7 +134,11 @@ func getFilePathFromURL(url string) (string, error) {
 
 	defer resp.Body.Close()
 
+	path := fmt.Sprintf("%s\\Downloads\\%s", dir, getPathFromResp(resp))
+
 	log.WithFields(log.Fields{"path": path}).Info("Writing")
+
+	os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
 	out, err := os.Create(path)
 
@@ -153,14 +174,14 @@ func setDesktopWallpaper(path string) error {
 	return nil
 }
 
-func url() string {
+func getURL() string {
 	return fmt.Sprintf(urlTemplate, width(), height())
 }
 
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true})
 
-	path, err := getFilePathFromURL(url())
+	path, err := getFilePathFromURL(getURL())
 
 	if err != nil {
 		log.Fatal(err)
