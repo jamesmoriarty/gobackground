@@ -100,30 +100,24 @@ func height() int {
 	return int(float64(win.GetSystemMetrics(win.SM_CYSCREEN)) * scale())
 }
 
-func getPathFromResp(resp *http.Response) string {
+func getPathFromResp(resp *http.Response) (string, error) {
 	url, err := url.Parse(resp.Request.URL.String())
 
 	if err != nil {
-		panic("Unexpected url")
+		return "", err
 	}
 
 	filename := filepath.Base(url.Path)
 
 	switch resp.Header.Get("Content-Type") {
 	case "image/jpeg":
-		return fmt.Sprintf("%s\\%s.jpg", url.Hostname(), filename)
+		return fmt.Sprintf("%s\\%s.jpg", url.Hostname(), filename), nil
 	default:
-		panic("Unexpected content type")
+		return "", errors.New("Unexpected content type")
 	}
 }
 
 func getFilePathFromURL(url string) (string, error) {
-	dir, err := os.UserHomeDir()
-
-	if err != nil {
-		return "", err
-	}
-
 	resp, err := http.Get(url)
 
 	log.WithFields(log.Fields{"url": url}).Info("Fetching")
@@ -134,7 +128,19 @@ func getFilePathFromURL(url string) (string, error) {
 
 	defer resp.Body.Close()
 
-	path := fmt.Sprintf("%s\\Downloads\\%s", dir, getPathFromResp(resp))
+	dirPath, err := os.UserHomeDir()
+
+	if err != nil {
+		return "", err
+	}
+
+	filePath, err := getPathFromResp(resp)
+
+	if err != nil {
+		return "", err
+	}
+
+	path := fmt.Sprintf("%s\\Downloads\\%s", dirPath, filePath)
 
 	log.WithFields(log.Fields{"path": path}).Info("Writing")
 
