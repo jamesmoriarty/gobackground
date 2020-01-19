@@ -38,7 +38,6 @@ const (
 )
 
 func errstr(errno int32) string {
-	// ask windows for the remaining errors
 	var flags uint32 = syscall.FORMAT_MESSAGE_FROM_SYSTEM | syscall.FORMAT_MESSAGE_ARGUMENT_ARRAY | syscall.FORMAT_MESSAGE_IGNORE_INSERTS
 	b := make([]uint16, 300)
 	n, err := syscall.FormatMessage(flags, 0, uint32(errno), 0, b, nil)
