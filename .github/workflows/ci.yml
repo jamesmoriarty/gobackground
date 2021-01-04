@@ -1,0 +1,29 @@
+name: Continuous Integration
+
+on: [ push ]
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        go: [ '1.13' ]
+        goos: [ 'windows' ]
+        goarch: [ 'amd64' ]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go }}
+
+      - run: gofmt -l $(find . -type f -name '*.go' -not -path "./vendor/*") 2>&1
+
+      - run: go build -v .
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+
+      - run: go test .
