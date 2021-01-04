@@ -18,7 +18,7 @@ import (
 
 const (
 	// Unspashed Search
-	urlTemplate = "https://source.unsplash.com/%dx%d/?backgrounds,desktop,computer"
+	urlTemplate = "https://source.unsplash.com/%dx%d/daily"
 
 	// Registry Wallpaper
 	wallpaperDir = "Control Panel\\Desktop"
